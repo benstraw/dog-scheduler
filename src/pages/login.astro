@@ -43,7 +43,12 @@ const missingConfig = !projectId;
           redirect-url={new URL('/login', Astro.url).href}
         ></descope-wc>
         <p id="widget-error" style="display:none; color: var(--color-warn); font-family: var(--font-ui); font-size:0.9rem; padding: 1rem 0;">
-          Sign-in failed to load. Please <a href="/login">refresh</a> or try again later.
+          Sign-in widget failed to load. Please <a href="/login">refresh</a> or try again later.
+        </p>
+        <p id="auth-error" style="display:none; color: var(--color-warn); font-family: var(--font-ui); font-size:0.9rem; padding: 1rem 0; background: #fff3cd; border-radius: 6px; margin-top: 0.5rem; word-break: break-word;">
+          Sign-in failed — <span id="auth-error-detail">please try again</span>.
+          <br />
+          <a href="/login" style="font-weight:bold;">Try again ↺</a>
         </p>
       </div>
     </>
@@ -58,28 +63,43 @@ const missingConfig = !projectId;
   // Load the Descope Web Component bundle from the CDN
   const loadWidget = import('https://cdn.jsdelivr.net/npm/@descope/web-component@3/dist/index.js');
 
-  function showError() {
+  function showWidgetLoadError() {
     const widget = document.querySelector('descope-wc') as HTMLElement | null;
     const errEl = document.getElementById('widget-error');
     if (widget) widget.style.display = 'none';
     if (errEl) errEl.style.display = 'block';
   }
 
+  function showAuthError(detail?: string) {
+    const MAX_MSG_LEN = 200;
+    const widget = document.querySelector('descope-wc') as HTMLElement | null;
+    const errEl = document.getElementById('auth-error');
+    const detailEl = document.getElementById('auth-error-detail');
+    if (widget) widget.style.display = 'none';
+    if (detailEl && detail) {
+      detailEl.textContent = detail.length > MAX_MSG_LEN
+        ? detail.slice(0, MAX_MSG_LEN) + '…'
+        : detail;
+    }
+    if (errEl) errEl.style.display = 'block';
+    console.error('[descope] auth error:', detail ?? '(no detail)');
+  }
+
   // Show an error if the CDN script fails to load
   loadWidget.catch(() => {
     console.warn('[descope] web-component failed to load from CDN');
-    showError();
+    showWidgetLoadError();
   });
 
   // Fallback timeout: if the custom element isn't defined within this time, show an error
   const WIDGET_LOAD_TIMEOUT_MS = 15_000;
   const definedTimeout = setTimeout(() => {
-    if (!customElements.get('descope-wc')) showError();
+    if (!customElements.get('descope-wc')) showWidgetLoadError();
   }, WIDGET_LOAD_TIMEOUT_MS);
 
   customElements.whenDefined('descope-wc')
     .then(() => clearTimeout(definedTimeout))
-    .catch(() => showError());
+    .catch(() => showWidgetLoadError());
 
   // Listen for successful authentication and redirect based on user status
   document.addEventListener('DOMContentLoaded', () => {
@@ -87,30 +107,43 @@ const missingConfig = !projectId;
     if (!widget) return;
 
     widget.addEventListener('success', async (e: Event) => {
-      const customEvent = e as CustomEvent<{
-        sessionJwt: string;
-        user?: { customAttributes?: { status?: string } };
-      }>;
-      const { sessionJwt, user } = customEvent.detail ?? {};
+      try {
+        const customEvent = e as CustomEvent<{
+          sessionJwt: string;
+          user?: { customAttributes?: { status?: string } };
+        }>;
+        const { sessionJwt, user } = customEvent.detail ?? {};
 
-      // Persist the session token as a cookie so the server can read it
-      if (sessionJwt) {
+        if (!sessionJwt) {
+          showAuthError('No session token received — please try again');
+          return;
+        }
+
+        // Persist the session token as a cookie so the server can read it
         document.cookie = `DS=${encodeURIComponent(sessionJwt)}; path=/; SameSite=Strict`;
-      }
 
-      const status = user?.customAttributes?.status;
+        const status = user?.customAttributes?.status;
 
-      if (status === 'APPROVED') {
-        window.location.href = '/schedule';
-      } else if (status === 'DISABLED') {
-        window.location.href = '/pending?disabled=1';
-      } else {
-        // PENDING or no status yet — treat as pending
-        window.location.href = '/pending';
+        if (status === 'APPROVED') {
+          window.location.href = '/schedule';
+        } else if (status === 'DISABLED') {
+          window.location.href = '/pending?disabled=1';
+        } else {
+          // PENDING or no status yet — treat as pending
+          window.location.href = '/pending';
+        }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        showAuthError(msg || 'Unexpected error during sign-in');
       }
     });
 
     // Show an error if the Descope widget fires an error event
-    widget.addEventListener('error', () => showError());
+    widget.addEventListener('error', (e: Event) => {
+      const customEvent = e as CustomEvent<{ errorCode?: string; errorDescription?: string }>;
+      const detail = customEvent.detail;
+      const msg = detail?.errorDescription || detail?.errorCode || 'Authentication error';
+      showAuthError(msg);
+    });
   });
 </script>
