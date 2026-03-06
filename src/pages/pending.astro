@@ -1,0 +1,65 @@
+---
+/**
+ * /pending — Awaiting approval (or disabled) page
+ *
+ * Route guard: must be authenticated (any status).
+ * Unauthenticated visitors are redirected to /.
+ * APPROVED users are redirected to /schedule.
+ */
+import Layout from '../components/Layout.astro';
+import LogoutButton from '../components/LogoutButton.astro';
+import { requireAuth } from '../lib/authGuard';
+
+const result = await requireAuth(Astro);
+if (result instanceof Response) return result;
+const user = result;
+
+// APPROVED users shouldn't land here
+if (user.status === 'APPROVED') {
+  return Astro.redirect('/schedule');
+}
+
+const isDisabled = Astro.url.searchParams.get('disabled') === '1'
+  || user.status === 'DISABLED';
+---
+<Layout title={isDisabled ? 'Account Disabled' : 'Awaiting Approval'}>
+  <Fragment slot="header-action">
+    <LogoutButton />
+  </Fragment>
+
+  <div class="card">
+    {isDisabled ? (
+      <>
+        <span class="status-disabled">Disabled</span>
+        <h1 style="margin-top:0.75rem; font-size:1.5rem;">Account Disabled</h1>
+        <p style="margin-top:0.75rem;">
+          Your account has been disabled. Please contact us if you believe this
+          is an error.
+        </p>
+        <p style="margin-top:0.75rem; font-size:0.9rem;">
+          Reach out at
+          <a href="mailto:hello@dogadventures.example">hello@dogadventures.example</a>
+          or on Discord.
+        </p>
+      </>
+    ) : (
+      <>
+        <span class="status-pending">Pending approval</span>
+        <h1 style="margin-top:0.75rem; font-size:1.5rem;">Awaiting Approval</h1>
+        <p style="margin-top:0.75rem;">
+          Your account is awaiting approval. Once approved you will be able to
+          schedule dog adventures.
+        </p>
+        <p style="margin-top:0.75rem; font-size:0.9rem;">
+          We'll be in touch shortly! In the meantime feel free to reach us at
+          <a href="mailto:hello@dogadventures.example">hello@dogadventures.example</a>
+          or on Discord.
+        </p>
+      </>
+    )}
+
+    <div style="margin-top:1.5rem;">
+      <LogoutButton />
+    </div>
+  </div>
+</Layout>

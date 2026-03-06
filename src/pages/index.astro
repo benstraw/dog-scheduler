@@ -1,0 +1,43 @@
+---
+/**
+ * / — Landing page (public)
+ *
+ * Shows the service description and a "Log in with Discord" button.
+ * Already-authenticated APPROVED users are forwarded to /schedule.
+ */
+import Layout from '../components/Layout.astro';
+import LoginButton from '../components/LoginButton.astro';
+import { getSessionToken, validateSession } from '../lib/descope';
+
+// If the visitor is already logged in and approved, skip straight to scheduling
+const token = getSessionToken(Astro.request);
+if (token) {
+  const user = await validateSession(token);
+  if (user?.status === 'APPROVED') {
+    return Astro.redirect('/schedule');
+  }
+}
+---
+<Layout title="Welcome">
+  <h1>Bespoke Dog Adventures</h1>
+
+  <p>
+    Personalised, small-group dog hikes and walks through the best trails in
+    the area. Each adventure is tailored to your dog's pace, energy, and
+    personality — because no two dogs are the same.
+  </p>
+
+  <p>
+    To book an adventure, log in with your Discord account below. New clients
+    are approved manually so we can make sure every outing is a great fit.
+  </p>
+
+  <div>
+    <LoginButton />
+  </div>
+
+  <p style="font-size:0.9rem">
+    Questions? Reach out on Discord or email us at
+    <a href="mailto:hello@dogadventures.example">hello@dogadventures.example</a>.
+  </p>
+</Layout>
