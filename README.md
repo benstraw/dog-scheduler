@@ -2,7 +2,7 @@
 
 A minimal scheduling web app for a bespoke dog hiking / dog walking service.
 Only manually approved clients can access the Google Calendar scheduling widget.
-Authentication is handled by Discord login via [Descope](https://descope.com).
+Authentication is handled via [Descope](https://descope.com) (Google, Apple, or Passkeys).
 
 ---
 
@@ -106,7 +106,7 @@ Bookings are managed entirely through Google Calendar — no custom booking logi
 | Path | Access | Description |
 |---|---|---|
 | `/` | Public | Landing page with login button |
-| `/login` | Public | Descope login widget (Discord OAuth) |
+| `/login` | Public | Descope login widget (Google / Apple / Passkeys) |
 | `/pending` | Authenticated | Awaiting-approval or disabled message |
 | `/schedule` | APPROVED only | Google Calendar scheduling embed |
 
@@ -115,7 +115,7 @@ Bookings are managed entirely through Google Calendar — no custom booking logi
 ## ARCHITECTURE
 
 - **[Astro](https://astro.build)** — static-first framework with SSR for guarded routes
-- **[Descope](https://descope.com)** — auth & session management (Discord OAuth)
+- **[Descope](https://descope.com)** — auth & session management (Google, Apple, Passkeys)
 - **Google Calendar** — appointment scheduling embed
 - No database — all user state lives in Descope custom attributes
 - No heavy UI frameworks — plain HTML, minimal CSS, vanilla JS only where needed

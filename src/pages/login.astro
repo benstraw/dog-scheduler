@@ -4,7 +4,7 @@
  *
  * This page serves two purposes:
  *
- * 1. Renders the Descope login widget (Discord OAuth) for unauthenticated users.
+ * 1. Renders the Descope login widget (Google / Apple / Passkeys) for unauthenticated users.
  * 2. Acts as the post-login redirect target: the client-side Descope SDK fires
  *    an `onSuccess` event, at which point we POST to /api/auth/session to
  *    exchange the tokens, then redirect to the correct page based on status.
@@ -40,6 +40,7 @@ const missingConfig = !projectId;
         <descope-wc
           project-id={projectId}
           flow-id="sign-up-or-in"
+          redirect-url={new URL('/login', Astro.url).href}
         ></descope-wc>
         <p id="widget-error" style="display:none; color: var(--color-warn); font-family: var(--font-ui); font-size:0.9rem; padding: 1rem 0;">
           Sign-in failed to load. Please <a href="/login">refresh</a> or try again later.
