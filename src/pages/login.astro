@@ -26,6 +26,9 @@ const missingConfig = !projectId;
   {missingConfig ? (
     <div class="card" style="text-align:center; color: var(--color-warn)">
       <p>Authentication is not configured yet. Please contact the site owner.</p>
+      <p style="font-size:0.8rem; margin-top:0.75rem; opacity:0.75;">
+        Site owner: set the <code>DESCOPE_PROJECT_ID</code> environment variable and redeploy.
+      </p>
     </div>
   ) : (
     <>
