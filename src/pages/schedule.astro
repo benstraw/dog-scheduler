@@ -9,7 +9,7 @@
  *   - APPROVED         → renders this page
  */
 import Layout from '../components/Layout.astro';
-import LogoutButton from '../components/LogoutButton.astro';
+import AuthNav from '../components/AuthNav.astro';
 import { requireApproved } from '../lib/authGuard';
 
 const result = await requireApproved(Astro);
@@ -20,7 +20,7 @@ const embedUrl = import.meta.env.GOOGLE_SCHEDULING_EMBED_URL ?? '';
 ---
 <Layout title="Schedule Your Adventure">
   <Fragment slot="header-action">
-    <LogoutButton />
+    <AuthNav current="schedule" />
   </Fragment>
 
   <h1>Schedule Your Dog Adventure</h1>
