@@ -46,17 +46,15 @@ export async function validateSession(
 
     if (!authInfo?.token?.sub) return null;
 
-    const rawStatus = (authInfo.token as Record<string, unknown>)
-      ?.['customAttributes']
-      ? ((authInfo.token as Record<string, unknown>)['customAttributes'] as Record<string, unknown>)?.['status']
-      : undefined;
+    const token = authInfo.token as Record<string, unknown>;
+    const rawStatus = token?.['status'];
 
     const status = normalizeStatus(rawStatus);
 
     return {
       userId: authInfo.token.sub,
-      email: (authInfo.token as Record<string, unknown>)['email'] as string | undefined,
-      name: (authInfo.token as Record<string, unknown>)['name'] as string | undefined,
+      email: token['email'] as string | undefined,
+      name: token['name'] as string | undefined,
       status,
     };
   } catch (err) {
