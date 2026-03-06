@@ -4,7 +4,7 @@
  *
  * This page serves two purposes:
  *
- * 1. Renders the Descope login widget (Discord OAuth) for unauthenticated users.
+ * 1. Renders the Descope login widget (Google / Apple / Passkeys) for unauthenticated users.
  * 2. Acts as the post-login redirect target: the client-side Descope SDK fires
  *    an `onSuccess` event, at which point we POST to /api/auth/session to
  *    exchange the tokens, then redirect to the correct page based on status.
@@ -15,6 +15,9 @@
 import Layout from '../components/Layout.astro';
 
 const projectId = import.meta.env.DESCOPE_PROJECT_ID ?? '';
+const appUrl = import.meta.env.PUBLIC_APP_URL ?? Astro.url.origin;
+const loginRedirectUrl = new URL('/login', appUrl).href;
+const missingConfig = !projectId;
 ---
 <Layout title="Log in" showHeader={false}>
   <div style="text-align:center; padding: 1rem 0 1.5rem;">
@@ -22,17 +25,36 @@ const projectId = import.meta.env.DESCOPE_PROJECT_ID ?? '';
     <h2 style="margin-top:0.75rem; color: var(--color-muted)">Sign in to continue</h2>
   </div>
 
-  <!--
-    Descope Web Component (web-component SDK).
-    We load it from the Descope CDN to keep dependencies minimal.
-    The `flow-id` must match the flow configured in your Descope project.
-  -->
-  <div class="card" style="text-align:center;">
-    <descope-wc
-      project-id={projectId}
-      flow-id="sign-up-or-in"
-    ></descope-wc>
-  </div>
+  {missingConfig ? (
+    <div class="card" style="text-align:center; color: var(--color-warn)">
+      <p>Authentication is not configured yet. Please contact the site owner.</p>
+      <p style="font-size:0.8rem; margin-top:0.75rem; opacity:0.75;">
+        Site owner: set the <code>DESCOPE_PROJECT_ID</code> environment variable and redeploy.
+      </p>
+    </div>
+  ) : (
+    <>
+      <!--
+        Descope Web Component (web-component SDK).
+        The `flow-id` must match the flow configured in your Descope project.
+      -->
+      <div class="card" style="text-align:center; min-height: 120px; position:relative;" id="widget-container">
+        <descope-wc
+          project-id={projectId}
+          flow-id="sign-up-or-in"
+          redirect-url={loginRedirectUrl}
+        ></descope-wc>
+        <p id="widget-error" style="display:none; color: var(--color-warn); font-family: var(--font-ui); font-size:0.9rem; padding: 1rem 0;">
+          Sign-in widget failed to load. Please <a href="/login">refresh</a> or try again later.
+        </p>
+        <p id="auth-error" style="display:none; color: var(--color-warn); font-family: var(--font-ui); font-size:0.9rem; padding: 1rem 0; background: #fff3cd; border-radius: 6px; margin-top: 0.5rem; word-break: break-word;">
+          Sign-in failed — <span id="auth-error-detail">please try again</span>.
+          <br />
+          <a href="/login" style="font-weight:bold;">Try again ↺</a>
+        </p>
+      </div>
+    </>
+  )}
 
   <p style="font-size:0.85rem; text-align:center; color: var(--color-muted)">
     <a href="/">← Back to home</a>
@@ -40,10 +62,46 @@ const projectId = import.meta.env.DESCOPE_PROJECT_ID ?? '';
 </Layout>
 
 <script>
-  // Load the Descope Web Component bundle from the CDN (pinned to major version for stability)
-  import('https://unpkg.com/@descope/web-component@3/dist/index.js').catch(() => {
+  // Load the Descope Web Component bundle from the CDN
+  const loadWidget = import('https://cdn.jsdelivr.net/npm/@descope/web-component@3/dist/index.js');
+
+  function showWidgetLoadError() {
+    const widget = document.querySelector('descope-wc') as HTMLElement | null;
+    const errEl = document.getElementById('widget-error');
+    if (widget) widget.style.display = 'none';
+    if (errEl) errEl.style.display = 'block';
+  }
+
+  function showAuthError(detail?: string) {
+    const MAX_MSG_LEN = 200;
+    const widget = document.querySelector('descope-wc') as HTMLElement | null;
+    const errEl = document.getElementById('auth-error');
+    const detailEl = document.getElementById('auth-error-detail');
+    if (widget) widget.style.display = 'none';
+    if (detailEl && detail) {
+      detailEl.textContent = detail.length > MAX_MSG_LEN
+        ? detail.slice(0, MAX_MSG_LEN) + '…'
+        : detail;
+    }
+    if (errEl) errEl.style.display = 'block';
+    console.error('[descope] auth error:', detail ?? '(no detail)');
+  }
+
+  // Show an error if the CDN script fails to load
+  loadWidget.catch(() => {
     console.warn('[descope] web-component failed to load from CDN');
+    showWidgetLoadError();
   });
+
+  // Fallback timeout: if the custom element isn't defined within this time, show an error
+  const WIDGET_LOAD_TIMEOUT_MS = 15_000;
+  const definedTimeout = setTimeout(() => {
+    if (!customElements.get('descope-wc')) showWidgetLoadError();
+  }, WIDGET_LOAD_TIMEOUT_MS);
+
+  customElements.whenDefined('descope-wc')
+    .then(() => clearTimeout(definedTimeout))
+    .catch(() => showWidgetLoadError());
 
   // Listen for successful authentication and redirect based on user status
   document.addEventListener('DOMContentLoaded', () => {
@@ -51,27 +109,43 @@ const projectId = import.meta.env.DESCOPE_PROJECT_ID ?? '';
     if (!widget) return;
 
     widget.addEventListener('success', async (e: Event) => {
-      const customEvent = e as CustomEvent<{
-        sessionJwt: string;
-        user?: { customAttributes?: { status?: string } };
-      }>;
-      const { sessionJwt, user } = customEvent.detail ?? {};
+      try {
+        const customEvent = e as CustomEvent<{
+          sessionJwt: string;
+          user?: { customAttributes?: { status?: string } };
+        }>;
+        const { sessionJwt, user } = customEvent.detail ?? {};
 
-      // Persist the session token as a cookie so the server can read it
-      if (sessionJwt) {
+        if (!sessionJwt) {
+          showAuthError('No session token received — please try again');
+          return;
+        }
+
+        // Persist the session token as a cookie so the server can read it
         document.cookie = `DS=${encodeURIComponent(sessionJwt)}; path=/; SameSite=Strict`;
-      }
 
-      const status = user?.customAttributes?.status;
+        const status = user?.customAttributes?.status;
 
-      if (status === 'APPROVED') {
-        window.location.href = '/schedule';
-      } else if (status === 'DISABLED') {
-        window.location.href = '/pending?disabled=1';
-      } else {
-        // PENDING or no status yet — treat as pending
-        window.location.href = '/pending';
+        if (status === 'APPROVED') {
+          window.location.href = '/schedule';
+        } else if (status === 'DISABLED') {
+          window.location.href = '/pending?disabled=1';
+        } else {
+          // PENDING or no status yet — treat as pending
+          window.location.href = '/pending';
+        }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        showAuthError(msg || 'Unexpected error during sign-in');
       }
+    });
+
+    // Show an error if the Descope widget fires an error event
+    widget.addEventListener('error', (e: Event) => {
+      const customEvent = e as CustomEvent<{ errorCode?: string; errorDescription?: string }>;
+      const detail = customEvent.detail;
+      const msg = detail?.errorDescription || detail?.errorCode || 'Authentication error';
+      showAuthError(msg);
     });
   });
 </script>

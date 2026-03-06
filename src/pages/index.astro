@@ -2,7 +2,7 @@
 /**
  * / — Landing page (public)
  *
- * Shows the service description and a "Log in with Discord" button.
+ * Shows the service description and a "Log in" button.
  * Already-authenticated APPROVED users are forwarded to /schedule.
  */
 import Layout from '../components/Layout.astro';
@@ -28,7 +28,7 @@ if (token) {
   </p>
 
   <p>
-    To book an adventure, log in with your Discord account below. New clients
+    To book an adventure, log in below. New clients
     are approved manually so we can make sure every outing is a great fit.
   </p>
 
@@ -37,7 +37,7 @@ if (token) {
   </div>
 
   <p style="font-size:0.9rem">
-    Questions? Reach out on Discord or email us at
+    Questions? Email us at
     <a href="mailto:hello@dogadventures.example">hello@dogadventures.example</a>.
   </p>
 </Layout>

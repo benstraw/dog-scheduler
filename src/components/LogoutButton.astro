@@ -2,6 +2,4 @@
 // LogoutButton.astro
 // Clears the Descope session cookie and redirects to the landing page.
 ---
-<form method="POST" action="/api/logout" style="display:inline">
-  <button type="submit" class="btn btn-ghost">Log out</button>
-</form>
+<a href="/api/logout" class="btn btn-ghost">Log out</a>
