@@ -24,7 +24,7 @@ npm run dev
 Create a `.env` file in the project root (see `.env.example`):
 
 ```
-DESCOPE_PROJECT_ID=P2vMx4blXVn0koQVmFGNnimqPM6v
+DESCOPE_PROJECT_ID=your_descope_project_id_here
 GOOGLE_SCHEDULING_EMBED_URL=https://calendar.google.com/calendar/appointments/...
 ```
 
