@@ -60,7 +60,7 @@ export async function validateSession(
       status,
     };
   } catch (err) {
-    // Invalid/expired token – not an error worth logging at warn level
+    console.error('[descope] session validation failed:', err instanceof Error ? err.message : String(err));
     return null;
   }
 }
