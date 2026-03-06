@@ -1,5 +1,5 @@
 /**
- * POST /api/logout
+ * GET|POST /api/logout
  *
  * Clears the Descope session cookie and redirects to the landing page.
  * The Descope Web SDK sets the `DS` cookie; we clear it here on the
@@ -8,7 +8,7 @@
  */
 import type { APIRoute } from 'astro';
 
-export const POST: APIRoute = () => {
+function logoutResponse() {
   return new Response(null, {
     status: 302,
     headers: {
@@ -18,4 +18,7 @@ export const POST: APIRoute = () => {
         'DS=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0',
     },
   });
-};
+}
+
+export const GET: APIRoute = () => logoutResponse();
+export const POST: APIRoute = () => logoutResponse();
