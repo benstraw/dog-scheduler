@@ -21,6 +21,14 @@ npm run dev
 
 ## ENVIRONMENT VARIABLES
 
+| Variable | Required | Description |
+|---|---|---|
+| `DESCOPE_PROJECT_ID` | ✅ | Descope project ID — used to validate session JWTs |
+| `GOOGLE_SCHEDULING_EMBED_URL` | ✅ | Full URL from your Google Calendar appointment page (Embed → copy the `src` value) |
+| `DESCOPE_MANAGEMENT_KEY` | _(optional)_ | Only needed if you add a future admin UI |
+
+### Local development
+
 Create a `.env` file in the project root (see `.env.example`):
 
 ```
@@ -28,11 +36,22 @@ DESCOPE_PROJECT_ID=your_descope_project_id_here
 GOOGLE_SCHEDULING_EMBED_URL=https://calendar.google.com/calendar/appointments/...
 ```
 
-| Variable | Required | Description |
-|---|---|---|
-| `DESCOPE_PROJECT_ID` | ✅ | Descope project ID — used to validate session JWTs |
-| `GOOGLE_SCHEDULING_EMBED_URL` | ✅ | Full URL from your Google Calendar appointment page (Embed → copy the `src` value) |
-| `DESCOPE_MANAGEMENT_KEY` | _(optional)_ | Only needed if you add a future admin UI |
+### Deploying to Vercel
+
+Environment variables must be added in the **Vercel dashboard** — the `.env` file is only used for local development.
+
+1. Open your project on [vercel.com](https://vercel.com) and go to **Settings → Environment Variables**.
+2. Add each required variable:
+
+   | Name | Value |
+   |---|---|
+   | `DESCOPE_PROJECT_ID` | Your Descope project ID (from [console.descope.com](https://console.descope.com) → Project Settings) |
+   | `GOOGLE_SCHEDULING_EMBED_URL` | The `src` URL from your Google Calendar appointment scheduling embed |
+
+3. Set the **Environment** to **Production** (and optionally Preview/Development).
+4. Click **Save**, then **redeploy** the project so the new variables take effect.
+
+> **Tip:** If you see "Authentication is not configured yet" after deploying, it means `DESCOPE_PROJECT_ID` is missing or empty in the Vercel environment. Double-check the variable name (no extra spaces), save, and trigger a new deployment.
 
 ---
 
