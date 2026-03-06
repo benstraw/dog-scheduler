@@ -1,0 +1,77 @@
+---
+/**
+ * /login — Authentication entry point
+ *
+ * This page serves two purposes:
+ *
+ * 1. Renders the Descope login widget (Discord OAuth) for unauthenticated users.
+ * 2. Acts as the post-login redirect target: the client-side Descope SDK fires
+ *    an `onSuccess` event, at which point we POST to /api/auth/session to
+ *    exchange the tokens, then redirect to the correct page based on status.
+ *
+ * No server-side session validation is needed here – the widget handles auth
+ * and the client JS below forwards the resulting session token to the server.
+ */
+import Layout from '../components/Layout.astro';
+
+const projectId = import.meta.env.DESCOPE_PROJECT_ID ?? '';
+---
+<Layout title="Log in" showHeader={false}>
+  <div style="text-align:center; padding: 1rem 0 1.5rem;">
+    <a href="/" style="font-size:1.5rem; text-decoration:none;">🐾 Dog Adventures</a>
+    <h2 style="margin-top:0.75rem; color: var(--color-muted)">Sign in to continue</h2>
+  </div>
+
+  <!--
+    Descope Web Component (web-component SDK).
+    We load it from the Descope CDN to keep dependencies minimal.
+    The `flow-id` must match the flow configured in your Descope project.
+  -->
+  <div class="card" style="text-align:center;">
+    <descope-wc
+      project-id={projectId}
+      flow-id="sign-up-or-in"
+    ></descope-wc>
+  </div>
+
+  <p style="font-size:0.85rem; text-align:center; color: var(--color-muted)">
+    <a href="/">← Back to home</a>
+  </p>
+</Layout>
+
+<script>
+  // Load the Descope Web Component bundle from the CDN (pinned to major version for stability)
+  import('https://unpkg.com/@descope/web-component@3/dist/index.js').catch(() => {
+    console.warn('[descope] web-component failed to load from CDN');
+  });
+
+  // Listen for successful authentication and redirect based on user status
+  document.addEventListener('DOMContentLoaded', () => {
+    const widget = document.querySelector('descope-wc');
+    if (!widget) return;
+
+    widget.addEventListener('success', async (e: Event) => {
+      const customEvent = e as CustomEvent<{
+        sessionJwt: string;
+        user?: { customAttributes?: { status?: string } };
+      }>;
+      const { sessionJwt, user } = customEvent.detail ?? {};
+
+      // Persist the session token as a cookie so the server can read it
+      if (sessionJwt) {
+        document.cookie = `DS=${encodeURIComponent(sessionJwt)}; path=/; SameSite=Strict`;
+      }
+
+      const status = user?.customAttributes?.status;
+
+      if (status === 'APPROVED') {
+        window.location.href = '/schedule';
+      } else if (status === 'DISABLED') {
+        window.location.href = '/pending?disabled=1';
+      } else {
+        // PENDING or no status yet — treat as pending
+        window.location.href = '/pending';
+      }
+    });
+  });
+</script>

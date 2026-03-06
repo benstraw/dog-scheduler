@@ -1,0 +1,36 @@
+---
+// Layout.astro – shared shell used by every page
+import '../styles/global.css';
+
+export interface Props {
+  title: string;
+  showHeader?: boolean;
+}
+
+const { title, showHeader = true } = Astro.props;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Bespoke Dog Adventures — personalized dog hiking and walking service" />
+    <title>{title} · Bespoke Dog Adventures</title>
+    <!-- Preconnect to Descope CDN -->
+    <link rel="preconnect" href="https://static.descope.com" />
+  </head>
+  <body>
+    {showHeader && (
+      <header class="site-header">
+        <a href="/" class="brand">🐾 Dog Adventures</a>
+        <slot name="header-action" />
+      </header>
+    )}
+    <main>
+      <slot />
+    </main>
+    <footer>
+      <p>© {new Date().getFullYear()} Bespoke Dog Adventures</p>
+    </footer>
+  </body>
+</html>

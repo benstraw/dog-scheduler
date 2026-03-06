@@ -1,0 +1,171 @@
+/* ------------------------------------------------------------------ *
+ * Global styles — calm outdoor aesthetic, mobile-first single column  *
+ * ------------------------------------------------------------------ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --color-bg:       #f5f0e8;
+  --color-surface:  #ffffff;
+  --color-border:   #d6cfc0;
+  --color-text:     #2d2a24;
+  --color-muted:    #6b6456;
+  --color-accent:   #4a7c59;
+  --color-accent-h: #3a6348;
+  --color-warn:     #8b4513;
+  --font-body:      'Georgia', serif;
+  --font-ui:        system-ui, -apple-system, sans-serif;
+  --max-width:      640px;
+  --radius:         8px;
+  --space:          1.5rem;
+}
+
+html {
+  font-size: 18px;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+}
+
+body {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space);
+}
+
+main {
+  width: 100%;
+  max-width: var(--max-width);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space);
+  padding-top: 2rem;
+}
+
+/* Typography */
+h1 {
+  font-size: 2rem;
+  line-height: 1.2;
+  color: var(--color-accent);
+}
+
+h2 {
+  font-size: 1.4rem;
+  color: var(--color-muted);
+  font-weight: normal;
+}
+
+p {
+  line-height: 1.7;
+  color: var(--color-muted);
+}
+
+a {
+  color: var(--color-accent);
+}
+
+/* Buttons */
+.btn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: var(--radius);
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+
+.btn-primary {
+  background: var(--color-accent);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: var(--color-accent-h);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--color-muted);
+  border: 1px solid var(--color-border);
+}
+
+.btn-ghost:hover {
+  background: var(--color-border);
+}
+
+/* Card */
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: var(--space);
+}
+
+/* Status badge */
+.status-pending {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background: #fff8e1;
+  border: 1px solid #f9c74f;
+  border-radius: 999px;
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  color: #7d5a00;
+}
+
+.status-disabled {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background: #fbe9e7;
+  border: 1px solid #e57373;
+  border-radius: 999px;
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  color: var(--color-warn);
+}
+
+/* Nav / header strip */
+.site-header {
+  width: 100%;
+  max-width: var(--max-width);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 0.5rem;
+}
+
+.site-header .brand {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+/* Schedule iframe wrapper */
+.schedule-embed {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+footer {
+  width: 100%;
+  max-width: var(--max-width);
+  padding: var(--space) 0 0.5rem;
+  text-align: center;
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  color: var(--color-muted);
+}

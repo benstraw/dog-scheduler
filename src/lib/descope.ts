@@ -1,0 +1,86 @@
+/**
+ * descope.ts
+ *
+ * Server-side helper for validating Descope session tokens and reading
+ * user custom attributes.  Uses the official @descope/node-sdk for
+ * proper JWT validation against Descope's cached JWKS public keys.
+ *
+ * Session cookie name: DS (set by the Descope Web Component on the client).
+ */
+
+import DescopeClient from '@descope/node-sdk';
+
+export type UserStatus = 'PENDING' | 'APPROVED' | 'DISABLED';
+
+export interface DescopeUserInfo {
+  userId: string;
+  email?: string;
+  name?: string;
+  status: UserStatus;
+}
+
+// Singleton Descope client (created lazily once per process)
+let _client: ReturnType<typeof DescopeClient> | null = null;
+
+function getClient(): ReturnType<typeof DescopeClient> {
+  if (!_client) {
+    const projectId = import.meta.env.DESCOPE_PROJECT_ID;
+    if (!projectId) {
+      throw new Error('[descope] DESCOPE_PROJECT_ID is not configured');
+    }
+    _client = DescopeClient({ projectId });
+  }
+  return _client;
+}
+
+/**
+ * Validate a Descope session token (JWT) using the Node SDK.
+ * Returns the decoded user info or null when the token is invalid / expired.
+ */
+export async function validateSession(
+  sessionToken: string
+): Promise<DescopeUserInfo | null> {
+  try {
+    const client = getClient();
+    const authInfo = await client.validateSession(sessionToken);
+
+    if (!authInfo?.token?.sub) return null;
+
+    const rawStatus = (authInfo.token as Record<string, unknown>)
+      ?.['customAttributes']
+      ? ((authInfo.token as Record<string, unknown>)['customAttributes'] as Record<string, unknown>)?.['status']
+      : undefined;
+
+    const status = normalizeStatus(rawStatus);
+
+    return {
+      userId: authInfo.token.sub,
+      email: (authInfo.token as Record<string, unknown>)['email'] as string | undefined,
+      name: (authInfo.token as Record<string, unknown>)['name'] as string | undefined,
+      status,
+    };
+  } catch (err) {
+    // Invalid/expired token – not an error worth logging at warn level
+    return null;
+  }
+}
+
+/**
+ * Extract the Descope session token (DS cookie) from a request.
+ */
+export function getSessionToken(request: Request): string | null {
+  const cookie = request.headers.get('cookie') ?? '';
+  // Descope sets a cookie named "DS" by default
+  const match = cookie.match(/(?:^|;\s*)DS=([^;]+)/);
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+/**
+ * Coerce an arbitrary custom-attribute value into a typed UserStatus.
+ * Defaults to PENDING when the attribute is missing or unrecognised.
+ */
+function normalizeStatus(raw: unknown): UserStatus {
+  if (raw === 'APPROVED') return 'APPROVED';
+  if (raw === 'DISABLED') return 'DISABLED';
+  return 'PENDING';
+}
