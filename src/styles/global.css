@@ -160,6 +160,16 @@ a {
   overflow: hidden;
 }
 
+/* Welcome message — shown below the header on authenticated pages */
+.welcome-msg {
+  width: 100%;
+  max-width: var(--max-width);
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  color: var(--color-muted);
+  padding: 0.5rem 0;
+}
+
 footer {
   width: 100%;
   max-width: var(--max-width);
