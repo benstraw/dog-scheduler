@@ -1,5 +1,59 @@
 ---
-// AuthNav.astro – logout action shown on all authenticated pages
+// AuthNav.astro – navigation strip shown on all authenticated pages
 import LogoutButton from './LogoutButton.astro';
+
+export interface Props {
+  current: 'schedule' | 'payments' | 'side-quest';
+}
+
+const { current } = Astro.props;
 ---
-<LogoutButton />
+<nav class="auth-nav">
+  <div class="auth-nav-links">
+    <a href="/schedule" class:list={['auth-nav-link', { active: current === 'schedule' }]}>
+      📅 Schedule
+    </a>
+    <a href="/side-quest" class:list={['auth-nav-link', { active: current === 'side-quest' }]}>
+      🐾 Side Quest
+    </a>
+    <a href="/payments" class:list={['auth-nav-link', { active: current === 'payments' }]}>
+      💳 Payments
+    </a>
+  </div>
+  <LogoutButton />
+</nav>
+
+<style>
+  .auth-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+  }
+
+  .auth-nav-links {
+    display: flex;
+    gap: 0.25rem;
+  }
+
+  .auth-nav-link {
+    font-family: var(--font-ui);
+    font-size: 0.9rem;
+    text-decoration: none;
+    color: var(--color-muted);
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--radius);
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+
+  .auth-nav-link:hover {
+    background: var(--color-border);
+    color: var(--color-text);
+  }
+
+  .auth-nav-link.active {
+    background: var(--color-accent);
+    color: #fff;
+  }
+</style>
