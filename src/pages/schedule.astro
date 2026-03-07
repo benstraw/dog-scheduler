@@ -23,7 +23,7 @@ const embedUrl = import.meta.env.GOOGLE_SCHEDULING_EMBED_URL ?? '';
     <AuthNav />
   </Fragment>
 
-  <h1>Schedule Your Dog Adventure</h1>
+  <h1>Welcome{user.name ? `, ${user.name}` : ''}</h1>
 
   {embedUrl ? (
     <>
