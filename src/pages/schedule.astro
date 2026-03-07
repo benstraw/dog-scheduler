@@ -18,9 +18,9 @@ const user = result;
 
 const embedUrl = import.meta.env.GOOGLE_SCHEDULING_EMBED_URL ?? '';
 ---
-<Layout title="Schedule Your Adventure">
+<Layout title="Schedule Your Adventure" welcomeName={user.name ?? ''}>
   <Fragment slot="header-action">
-    <AuthNav current="schedule" />
+    <AuthNav />
   </Fragment>
 
   <h1>Schedule Your Dog Adventure</h1>
@@ -54,8 +54,4 @@ const embedUrl = import.meta.env.GOOGLE_SCHEDULING_EMBED_URL ?? '';
       </p>
     </div>
   )}
-
-  <p style="font-size:0.85rem; color: var(--color-muted)">
-    Logged in{user.name ? ` as ${user.name}` : ''}.
-  </p>
 </Layout>

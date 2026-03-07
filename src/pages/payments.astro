@@ -59,9 +59,9 @@ const methods = [
   },
 ];
 ---
-<Layout title="Payments">
+<Layout title="Payments" welcomeName={user.name ?? ''}>
   <Fragment slot="header-action">
-    <AuthNav current="payments" />
+    <AuthNav />
   </Fragment>
 
   <h1>Payments</h1>
@@ -113,10 +113,6 @@ const methods = [
       <a href="mailto:hello@dogadventures.example">hello@dogadventures.example</a>.
     </p>
   </div>
-
-  <p style="font-size:0.85rem; color: var(--color-muted)">
-    Logged in{user.name ? ` as ${user.name}` : ''}.
-  </p>
 </Layout>
 
 <style>
