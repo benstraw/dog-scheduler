@@ -31,7 +31,7 @@ export const GET: APIRoute = async ({ url }) => {
     }
 
     const descope = DescopeClient({ projectId, managementKey });
-    await descope.management.user.updateCustomAttribute(userId, 'status', 'APPROVED');
+    await descope.management.user.updateCustomAttribute(userId, 'approvalStatus', 'APPROVED');
 
     return new Response(
       `<html>

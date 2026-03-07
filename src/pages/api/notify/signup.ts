@@ -32,7 +32,7 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   // Only send notification emails for PENDING users
-  if (user.status !== 'PENDING') {
+  if (user.approvalStatus !== 'PENDING') {
     return new Response(JSON.stringify({ ok: true, skipped: true }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },

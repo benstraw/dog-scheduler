@@ -112,7 +112,7 @@ const missingConfig = !projectId;
       try {
         const customEvent = e as CustomEvent<{
           sessionJwt: string;
-          user?: { customAttributes?: { status?: string } };
+          user?: { customAttributes?: { approvalStatus?: string } };
         }>;
         const { sessionJwt, user } = customEvent.detail ?? {};
 
@@ -124,7 +124,7 @@ const missingConfig = !projectId;
         // Persist the session token as a cookie so the server can read it
         document.cookie = `DS=${encodeURIComponent(sessionJwt)}; path=/; SameSite=Strict`;
 
-        const status = user?.customAttributes?.status;
+        const status = user?.customAttributes?.approvalStatus;
 
         if (status === 'APPROVED') {
           window.location.href = '/schedule';

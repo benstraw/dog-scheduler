@@ -70,11 +70,11 @@ export async function requireApproved(
     return astro.redirect('/');
   }
 
-  if (user.status === 'DISABLED') {
+  if (user.approvalStatus === 'DISABLED') {
     return astro.redirect('/pending?disabled=1');
   }
 
-  if (user.status !== 'APPROVED') {
+  if (user.approvalStatus !== 'APPROVED') {
     return astro.redirect('/pending');
   }
 

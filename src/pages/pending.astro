@@ -15,12 +15,12 @@ if (result instanceof Response) return result;
 const user = result;
 
 // APPROVED users shouldn't land here
-if (user.status === 'APPROVED') {
+if (user.approvalStatus === 'APPROVED') {
   return Astro.redirect('/schedule');
 }
 
 const isDisabled = Astro.url.searchParams.get('disabled') === '1'
-  || user.status === 'DISABLED';
+  || user.approvalStatus === 'DISABLED';
 ---
 <Layout title={isDisabled ? 'Account Disabled' : 'Awaiting Approval'}>
   <Fragment slot="header-action">
