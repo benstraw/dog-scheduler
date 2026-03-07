@@ -19,12 +19,12 @@ const user = result;
 const embedUrl2hr = import.meta.env.GOOGLE_SCHEDULING_EMBED_URL ?? '';
 const embedUrl4hr = import.meta.env.GOOGLE_SCHEDULING_EMBED_URL_4HR ?? '';
 ---
-<Layout title="Schedule Your Adventure" welcomeName={user.name ?? ''}>
+<Layout title="Schedule Your Adventure" welcomeName={user.name ?? user.email ?? ''}>
   <Fragment slot="header-action">
     <AuthNav />
   </Fragment>
 
-  <h1>Welcome{user.name ? `, ${user.name}` : ''}</h1>
+  <h1>Welcome{user.name ? `, ${user.name}` : user.email ? `, ${user.email}` : ''}</h1>
 
   <p class="adventure-intro">
     We have 2 hour and 4 hour time slots available throughout the week.
