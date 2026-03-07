@@ -16,7 +16,8 @@ const result = await requireApproved(Astro);
 if (result instanceof Response) return result;
 const user = result;
 
-const embedUrl = import.meta.env.GOOGLE_SCHEDULING_EMBED_URL ?? '';
+const embedUrl2hr = import.meta.env.GOOGLE_SCHEDULING_EMBED_URL ?? '';
+const embedUrl4hr = import.meta.env.GOOGLE_SCHEDULING_EMBED_URL_4HR ?? '';
 ---
 <Layout title="Schedule Your Adventure" welcomeName={user.name ?? ''}>
   <Fragment slot="header-action">
@@ -25,33 +26,111 @@ const embedUrl = import.meta.env.GOOGLE_SCHEDULING_EMBED_URL ?? '';
 
   <h1>Welcome{user.name ? `, ${user.name}` : ''}</h1>
 
-  {embedUrl ? (
-    <>
-      <div class="schedule-embed">
-        <iframe
-          src={embedUrl}
-          width="100%"
-          height="600"
-          frameborder="0"
-          style="border: 0; display:block;"
-          loading="lazy"
-          title="Google appointment scheduling"
-        ></iframe>
-      </div>
+  <p class="adventure-intro">
+    We have 2 hour and 4 hour time slots available throughout the week.
+    Select from the tabs below to choose your own Adventure!
+    If you want to go on a special quest, use this form to contact us
+    and let us know the details and we will do our best to accomodate you.
+  </p>
 
-      <p style="font-size:0.9rem; text-align:center;">
-        Having trouble with the embed?
-        <a href={embedUrl} target="_blank" rel="noopener noreferrer">
-          Open scheduling page in a new tab ↗
-        </a>
-      </p>
-    </>
-  ) : (
-    <div class="card">
-      <p>
-        The scheduling widget is not configured yet. Please set the
-        <code>GOOGLE_SCHEDULING_EMBED_URL</code> environment variable.
-      </p>
+  <div class="tabs" id="schedule-tabs">
+    <div class="tab-list" role="tablist" aria-label="Session length">
+      <button
+        class="tab-btn"
+        role="tab"
+        id="tab-2hr"
+        aria-controls="panel-2hr"
+        aria-selected="true"
+      >2 Hours</button>
+      <button
+        class="tab-btn"
+        role="tab"
+        id="tab-4hr"
+        aria-controls="panel-4hr"
+        aria-selected="false"
+      >4 Hours</button>
     </div>
-  )}
+
+    <!-- 2-hour panel -->
+    <div class="tab-panel" role="tabpanel" id="panel-2hr" aria-labelledby="tab-2hr" aria-hidden="false">
+      {embedUrl2hr ? (
+        <>
+          <div class="schedule-embed">
+            <iframe
+              src={embedUrl2hr}
+              width="100%"
+              height="600"
+              frameborder="0"
+              style="border: 0; display:block;"
+              loading="lazy"
+              title="Google appointment scheduling — 2 hours"
+            ></iframe>
+          </div>
+          <p style="font-size:0.9rem; text-align:center; margin-top:0.5rem;">
+            Having trouble with the embed?
+            <a href={embedUrl2hr} target="_blank" rel="noopener noreferrer">
+              Open scheduling page in a new tab ↗
+            </a>
+          </p>
+        </>
+      ) : (
+        <div class="card">
+          <p>
+            The 2-hour scheduling widget is not configured yet. Please set the
+            <code>GOOGLE_SCHEDULING_EMBED_URL</code> environment variable.
+          </p>
+        </div>
+      )}
+    </div>
+
+    <!-- 4-hour panel -->
+    <div class="tab-panel" role="tabpanel" id="panel-4hr" aria-labelledby="tab-4hr" aria-hidden="true">
+      {embedUrl4hr ? (
+        <>
+          <div class="schedule-embed">
+            <iframe
+              src={embedUrl4hr}
+              width="100%"
+              height="600"
+              frameborder="0"
+              style="border: 0; display:block;"
+              loading="lazy"
+              title="Google appointment scheduling — 4 hours"
+            ></iframe>
+          </div>
+          <p style="font-size:0.9rem; text-align:center; margin-top:0.5rem;">
+            Having trouble with the embed?
+            <a href={embedUrl4hr} target="_blank" rel="noopener noreferrer">
+              Open scheduling page in a new tab ↗
+            </a>
+          </p>
+        </>
+      ) : (
+        <div class="card">
+          <p>
+            The 4-hour scheduling widget is not configured yet. Please set the
+            <code>GOOGLE_SCHEDULING_EMBED_URL_4HR</code> environment variable.
+          </p>
+        </div>
+      )}
+    </div>
+  </div>
 </Layout>
+
+<script>
+  const tabs = document.querySelectorAll<HTMLButtonElement>('[role="tab"]');
+  const panels = document.querySelectorAll<HTMLElement>('[role="tabpanel"]');
+
+  tabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      const target = tab.getAttribute('aria-controls');
+
+      tabs.forEach((t) => t.setAttribute('aria-selected', 'false'));
+      panels.forEach((p) => p.setAttribute('aria-hidden', 'true'));
+
+      tab.setAttribute('aria-selected', 'true');
+      const activePanel = document.getElementById(target!);
+      if (activePanel) activePanel.setAttribute('aria-hidden', 'false');
+    });
+  });
+</script>
