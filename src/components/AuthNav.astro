@@ -3,7 +3,7 @@
 import LogoutButton from './LogoutButton.astro';
 
 export interface Props {
-  current: 'schedule' | 'payments';
+  current: 'schedule' | 'payments' | 'side-quest';
 }
 
 const { current } = Astro.props;
@@ -12,6 +12,9 @@ const { current } = Astro.props;
   <div class="auth-nav-links">
     <a href="/schedule" class:list={['auth-nav-link', { active: current === 'schedule' }]}>
       📅 Schedule
+    </a>
+    <a href="/side-quest" class:list={['auth-nav-link', { active: current === 'side-quest' }]}>
+      🐾 Side Quest
     </a>
     <a href="/payments" class:list={['auth-nav-link', { active: current === 'payments' }]}>
       💳 Payments

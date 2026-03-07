@@ -16,6 +16,7 @@ export interface DescopeUserInfo {
   userId: string;
   email?: string;
   name?: string;
+  phone?: string;
   status: UserStatus;
 }
 
@@ -55,6 +56,7 @@ export async function validateSession(
       userId: authInfo.token.sub,
       email: token['email'] as string | undefined,
       name: token['name'] as string | undefined,
+      phone: token['phone'] as string | undefined,
       status,
     };
   } catch (err) {
