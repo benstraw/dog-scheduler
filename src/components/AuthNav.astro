@@ -1,4 +1,5 @@
-// AuthNav.astro – logout action shown on all authenticated pages
+---
+// AuthNav.astro – navigation strip shown on all authenticated pages
 import LogoutButton from './LogoutButton.astro';
 
 export interface Props {
@@ -56,4 +57,3 @@ const { current } = Astro.props;
     color: #fff;
   }
 </style>
-<LogoutButton />
