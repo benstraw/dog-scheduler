@@ -131,7 +131,10 @@ const missingConfig = !projectId;
         } else if (status === 'DISABLED') {
           window.location.href = '/pending?disabled=1';
         } else {
-          // PENDING or no status yet — treat as pending
+          // PENDING or no status yet — new signup; send notification emails
+          fetch('/api/notify/signup', { method: 'POST', credentials: 'same-origin' }).catch(() => {
+            // Non-fatal: redirect regardless of whether emails succeeded
+          });
           window.location.href = '/pending';
         }
       } catch (err) {
