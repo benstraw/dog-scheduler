@@ -132,7 +132,7 @@ const missingConfig = !projectId;
           window.location.href = '/pending?disabled=1';
         } else {
           // PENDING or no status yet — new signup; send notification emails
-          fetch('/api/notify/signup', { method: 'POST', credentials: 'same-origin' }).catch(() => {
+          fetch('/api/notify/signup', { method: 'POST', credentials: 'same-origin', keepalive: true }).catch(() => {
             // Non-fatal: redirect regardless of whether emails succeeded
           });
           window.location.href = '/pending';
