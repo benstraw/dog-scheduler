@@ -13,6 +13,7 @@ import { Resend } from 'resend';
 const FROM_ADDRESS = 'noreply@dogs.benstrawbridge.com';
 const ADMIN_EMAIL = 'ben@benstrawbridge.com';
 const DESCOPE_USERS_URL = 'https://app.descope.com/users';
+const APP_URL = import.meta.env.PUBLIC_APP_URL || 'https://dog-scheduler.vercel.app';
 
 function getResendClient(): Resend {
   const apiKey = import.meta.env.RESEND_API_KEY;
@@ -48,9 +49,14 @@ export async function sendUserPendingEmail(userEmail: string, userName?: string)
 /**
  * Send an admin notification email when a new user signs up and needs approval.
  */
-export async function sendAdminNewUserEmail(userEmail: string, userName?: string): Promise<void> {
+export async function sendAdminNewUserEmail(userEmail: string, userName?: string, userId?: string): Promise<void> {
   const resend = getResendClient();
   const displayName = userName ? `${userName} (${userEmail})` : userEmail;
+
+  const adminSecret = import.meta.env.ADMIN_APPROVE_SECRET;
+  const approveLink = userId && adminSecret
+    ? `${APP_URL}/api/admin/approve?userId=${encodeURIComponent(userId)}&token=${encodeURIComponent(adminSecret)}`
+    : null;
 
   await resend.emails.send({
     from: FROM_ADDRESS,
@@ -59,6 +65,7 @@ export async function sendAdminNewUserEmail(userEmail: string, userName?: string
     html: `
       <p>A new user has signed up and is pending approval:</p>
       <p><strong>${displayName}</strong></p>
+      ${approveLink ? `<p><a href="${approveLink}">Approve this user →</a></p>` : ''}
       <p><a href="${DESCOPE_USERS_URL}">Review users in the Descope Console →</a></p>
     `,
   });

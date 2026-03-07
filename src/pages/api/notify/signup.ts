@@ -50,7 +50,7 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     await Promise.all([
       sendUserPendingEmail(userEmail, user.name),
-      sendAdminNewUserEmail(userEmail, user.name),
+      sendAdminNewUserEmail(userEmail, user.name, user.userId),
     ]);
 
     return new Response(JSON.stringify({ ok: true }), {
