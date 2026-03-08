@@ -20,6 +20,11 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   if (user.approvalStatus !== 'APPROVED') {
+    console.error('[onboarding-complete] User not APPROVED:', {
+      userId: user.userId,
+      approvalStatus: user.approvalStatus,
+      email: user.email,
+    });
     return new Response('Forbidden', { status: 403 });
   }
 
