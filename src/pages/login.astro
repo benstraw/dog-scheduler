@@ -112,7 +112,7 @@ const missingConfig = !projectId;
       try {
         const customEvent = e as CustomEvent<{
           sessionJwt: string;
-          user?: { customAttributes?: { status?: string } };
+          user?: { customAttributes?: { approvalStatus?: string } };
         }>;
         const { sessionJwt, user } = customEvent.detail ?? {};
 
@@ -124,14 +124,24 @@ const missingConfig = !projectId;
         // Persist the session token as a cookie so the server can read it
         document.cookie = `DS=${encodeURIComponent(sessionJwt)}; path=/; SameSite=Strict`;
 
-        const status = user?.customAttributes?.status;
+        const status = user?.customAttributes?.approvalStatus;
 
         if (status === 'APPROVED') {
           window.location.href = '/schedule';
         } else if (status === 'DISABLED') {
           window.location.href = '/pending?disabled=1';
         } else {
-          // PENDING or no status yet — treat as pending
+          // PENDING or no status yet — new signup; send notification emails
+          // Await the fetch before navigating, otherwise the browser cancels the request
+          try {
+            await fetch('/api/notify/signup', {
+              method: 'POST',
+              credentials: 'same-origin',
+              headers: { 'Content-Type': 'application/json' },
+            });
+          } catch {
+            // Non-fatal: redirect regardless of whether emails succeeded
+          }
           window.location.href = '/pending';
         }
       } catch (err) {
