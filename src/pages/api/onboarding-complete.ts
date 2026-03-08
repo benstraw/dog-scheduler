@@ -11,11 +11,13 @@ import { getSessionToken, validateSession } from '../../lib/descope';
 export const POST: APIRoute = async ({ request }) => {
   const sessionToken = getSessionToken(request);
   if (!sessionToken) {
+    console.error('[onboarding-complete] No session token found. Cookie header:', request.headers.get('cookie')?.substring(0, 100) ?? '(none)');
     return new Response('Unauthorized', { status: 401 });
   }
 
   const user = await validateSession(sessionToken);
   if (!user) {
+    console.error('[onboarding-complete] Session validation failed (token present but invalid)');
     return new Response('Unauthorized', { status: 401 });
   }
 
