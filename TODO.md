@@ -22,9 +22,9 @@ The "sign-up-or-in" flow currently has a "User Information - Unverified - Phone 
 
 ### Descope
 
-- [ ] **Create `onboarding_complete` custom attribute** — In Descope Console → Build → User Custom Attributes, add a new attribute named `onboarding_complete` (type: string). This is read from the JWT and set via the Management API.
-- [ ] **Add `onboarding_complete` to JWT claims** — Ensure the `onboarding_complete` attribute is included in the session JWT so the server can read it without an extra API call. (Descope Console → Build → JWT Templates or similar)
-- [ ] **Verify `DESCOPE_MANAGEMENT_KEY` exists** — In Descope Console → Settings → Management Keys, generate a key if you don't already have one. This is needed for the onboarding-complete and admin-approve endpoints.
+- [x] **Create `onboardingComplete` custom attribute** — Machine name: `onboardingComplete` (camelCase, Descope doesn't support snake_case).
+- [x] **Add `onboardingComplete` to JWT claims** — Added to JWT template as `"onboardingComplete": "{{user.customAttributes.onboardingComplete}}"`.
+- [x] **Verify `DESCOPE_MANAGEMENT_KEY` exists** — Needed for onboarding-complete and admin-approve endpoints.
 
 ### Vercel
 
@@ -41,6 +41,11 @@ The "sign-up-or-in" flow currently has a "User Information - Unverified - Phone 
 
 - [ ] **Create onboarding form** — New form for the `/onboarding` page. Fields: address, pickup_instructions, emergency_contact_name, emergency_contact_phone, vet_name, vet_phone, dog_name, dog_breed, dog_age, dog_size, dog_temperament, dog_leash_behavior, dog_medical_notes, _user_email, _user_name. Copy the form ID to `FORMSPREE_ONBOARDING_ID`.
 - [ ] **Rename/recreate adventure request form** (optional) — If you want a clean form ID, create a new Formspree form for adventure requests and use that ID as `FORMSPREE_ADVENTURE_REQUEST_ID`. Or just reuse the existing side-quest form ID under the new env var name.
+
+### Security
+
+- [ ] **Re-enable Astro CSRF origin check** — `checkOrigin` is currently disabled in `astro.config.mjs` because Astro 5's CSRF protection was blocking POST requests to API routes. Fix by setting `site` in astro config to the production URL, then re-enable `checkOrigin: true`. This ensures POST requests are validated against the expected origin.
+- [ ] **Improve post-onboarding flow** — Currently clears the session cookie and redirects to `/login` after onboarding because the JWT is stale (doesn't reflect the newly-set `onboardingComplete` flag). Ideally, use Descope's token refresh mechanism to get a fresh JWT without requiring re-login.
 
 ### Content & Images
 
