@@ -13,7 +13,7 @@ import { getSessionToken, validateSession } from '../lib/descope';
 const token = getSessionToken(Astro.request);
 if (token) {
   const user = await validateSession(token);
-  if (user?.status === 'APPROVED') {
+  if (user?.approvalStatus === 'APPROVED') {
     return Astro.redirect('/schedule');
   }
 }

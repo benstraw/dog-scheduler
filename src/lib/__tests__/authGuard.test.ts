@@ -24,19 +24,19 @@ function makeMockAstro() {
 const approvedUser: DescopeUserInfo = {
   userId: 'user-1',
   email: 'test@example.com',
-  status: 'APPROVED',
+  approvalStatus: 'APPROVED',
 };
 
 const pendingUser: DescopeUserInfo = {
   userId: 'user-2',
   email: 'pending@example.com',
-  status: 'PENDING',
+  approvalStatus: 'PENDING',
 };
 
 const disabledUser: DescopeUserInfo = {
   userId: 'user-3',
   email: 'disabled@example.com',
-  status: 'DISABLED',
+  approvalStatus: 'DISABLED',
 };
 
 beforeEach(() => {
