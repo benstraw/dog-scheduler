@@ -89,7 +89,7 @@ describe('POST /api/onboarding-complete', () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body).toEqual({ ok: true });
-    expect(mockUpdateCustomAttribute).toHaveBeenCalledWith('user-1', 'onboarding_complete', 'true');
+    expect(mockUpdateCustomAttribute).toHaveBeenCalledWith('user-1', 'onboardingComplete', 'true');
   });
 
   it('returns 500 when Descope management API fails', async () => {

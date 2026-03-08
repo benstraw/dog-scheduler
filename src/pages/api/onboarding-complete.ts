@@ -33,7 +33,7 @@ export const POST: APIRoute = async ({ request }) => {
 
   try {
     const descope = DescopeClient({ projectId, managementKey });
-    await descope.management.user.updateCustomAttribute(user.userId, 'onboarding_complete', 'true');
+    await descope.management.user.updateCustomAttribute(user.userId, 'onboardingComplete', 'true');
 
     return new Response(JSON.stringify({ ok: true }), {
       status: 200,

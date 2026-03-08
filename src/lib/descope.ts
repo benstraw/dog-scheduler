@@ -50,7 +50,7 @@ export async function validateSession(
 
     const token = authInfo.token as Record<string, unknown>;
     const rawStatus = token?.['approvalStatus'];
-    const rawOnboarding = token?.['onboarding_complete'];
+    const rawOnboarding = token?.['onboardingComplete'];
 
     const status = normalizeStatus(rawStatus);
 
