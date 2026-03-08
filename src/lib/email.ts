@@ -39,7 +39,7 @@ export async function sendUserPendingEmail(userEmail: string, userName?: string)
       <p>${greeting}</p>
       <p>Thanks for signing up for Dog Adventures! 🐾</p>
       <p>Your account is currently <strong>pending approval</strong>. We review all new accounts personally and will be in touch soon.</p>
-      <p>Once approved, you'll be able to log in and schedule your dog adventures.</p>
+      <p>Once approved, you'll complete a quick onboarding form with details about you and your dog, and then you'll be ready to book your first adventure.</p>
       <p>If you have any questions in the meantime, feel free to reach out at <a href="mailto:${ADMIN_EMAIL}">${ADMIN_EMAIL}</a>.</p>
       <p>Talk soon,<br>Ben</p>
     `,

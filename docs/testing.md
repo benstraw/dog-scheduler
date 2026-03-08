@@ -17,7 +17,7 @@ npm run test:watch  # watch mode for local development
 
 ### Unit tests — `src/lib/__tests__/descope.test.ts`
 
-Pure-function tests for `getSessionToken`.  
+Pure-function tests for `getSessionToken`.
 No network calls, no mocking — just input/output assertions.
 
 Covers:
@@ -29,8 +29,9 @@ Covers:
 
 ### Integration tests — `src/lib/__tests__/authGuard.test.ts`
 
-Tests for `requireAuth` and `requireApproved` with the Descope SDK mocked out
-(`vi.mock('../descope')`).  Each test exercises a distinct auth scenario.
+Tests for `requireAuth`, `requireApproved`, and `requireApprovedNotOnboarded` with
+the Descope SDK mocked out (`vi.mock('../descope')`). Each test exercises a distinct
+auth scenario.
 
 **`requireAuth`**
 
@@ -46,9 +47,34 @@ Tests for `requireAuth` and `requireApproved` with the Descope SDK mocked out
 |---|---|
 | No session token | Redirect → `/` |
 | Invalid / expired token | Redirect → `/` |
-| `APPROVED` user | Returns `DescopeUserInfo` |
+| `APPROVED` + onboarded user | Returns `DescopeUserInfo` |
+| `APPROVED` + not onboarded | Redirect → `/onboarding` |
 | `PENDING` user | Redirect → `/pending` |
 | `DISABLED` user | Redirect → `/pending?disabled=1` |
+
+**`requireApprovedNotOnboarded`**
+
+| Scenario | Expected result |
+|---|---|
+| No session token | Redirect → `/` |
+| Invalid / expired token | Redirect → `/` |
+| `PENDING` user | Redirect → `/pending` |
+| `DISABLED` user | Redirect → `/pending?disabled=1` |
+| `APPROVED` + already onboarded | Redirect → `/member` |
+| `APPROVED` + not onboarded | Returns `DescopeUserInfo` |
+
+### API tests — `src/pages/api/__tests__/onboarding-complete.test.ts`
+
+Tests for `POST /api/onboarding-complete` with Descope SDK and Management API mocked.
+
+| Scenario | Expected result |
+|---|---|
+| No session token | 401 |
+| Invalid session token | 401 |
+| User not APPROVED | 403 |
+| APPROVED user, valid request | 200, calls `updateCustomAttribute` |
+| Descope Management API failure | 500 |
+| Missing management key | 500 |
 
 ## Test file locations
 
@@ -56,8 +82,12 @@ Tests for `requireAuth` and `requireApproved` with the Descope SDK mocked out
 src/
   lib/
     __tests__/
-      descope.test.ts     # unit tests for getSessionToken
-      authGuard.test.ts   # integration tests for requireAuth / requireApproved
+      descope.test.ts         # unit tests for getSessionToken
+      authGuard.test.ts        # integration tests for auth guards
+  pages/
+    api/
+      __tests__/
+        onboarding-complete.test.ts  # API endpoint tests
 ```
 
 ## What is not tested
@@ -68,17 +98,24 @@ src/
 | CSS / styling | No value in automated tests |
 | Descope SDK internals | Tested by the SDK itself; we mock at the boundary |
 | `validateSession` with a live token | Requires real Descope credentials; covered by manual checks |
+| Formspree form submission | External service; tested manually |
 
 ## Manual verification checklist
 
 Run these checks before merging auth-related changes:
 
-1. Visit `/login` — Descope widget loads.
-2. Log in with a `PENDING` account → redirected to `/pending`.
-3. Log in with a `DISABLED` account → redirected to `/pending?disabled=1`.
-4. Log in with an `APPROVED` account → redirected to `/schedule`.
-5. Access `/schedule` without a session → redirected to `/`.
-6. Remove `DESCOPE_PROJECT_ID` env var → `/login` shows the missing-config message.
+1. Visit `/` — public homepage loads with navigation.
+2. Visit `/about`, `/gallery`, `/request` — public pages render.
+3. Visit `/login` — Descope widget loads.
+4. Log in with a `PENDING` account → redirected to `/pending`.
+5. Log in with a `DISABLED` account → redirected to `/pending?disabled=1`.
+6. Log in with an `APPROVED` + not onboarded account → redirected to `/onboarding`.
+7. Complete onboarding form → redirected to `/member`.
+8. From `/member`, click booking cards → `/schedule` with correct tab selected.
+9. Visit `/adventure-request` — form renders and submits.
+10. Already-onboarded user visiting `/onboarding` → redirected to `/member`.
+11. Access `/member` without a session → redirected to `/`.
+12. Remove `DESCOPE_PROJECT_ID` env var → `/login` shows the missing-config message.
 
 ## Future layers
 
@@ -86,4 +123,3 @@ When the user base or risk profile grows, consider adding:
 
 - **Playwright smoke tests** for the critical happy-path flows (homepage loads,
   login widget renders, `/schedule` is gated).
-- **API route tests** for any future `src/pages/api/` endpoints.

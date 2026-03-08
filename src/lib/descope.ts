@@ -18,6 +18,7 @@ export interface DescopeUserInfo {
   name?: string;
   phone?: string;
   approvalStatus: UserStatus;
+  onboardingComplete: boolean;
 }
 
 // Singleton Descope client (created lazily once per process)
@@ -49,6 +50,7 @@ export async function validateSession(
 
     const token = authInfo.token as Record<string, unknown>;
     const rawStatus = token?.['approvalStatus'];
+    const rawOnboarding = token?.['onboarding_complete'];
 
     const status = normalizeStatus(rawStatus);
 
@@ -58,6 +60,7 @@ export async function validateSession(
       name: token['name'] as string | undefined,
       phone: token['phone'] as string | undefined,
       approvalStatus: status,
+      onboardingComplete: rawOnboarding === 'true' || rawOnboarding === true,
     };
   } catch (err) {
     console.error('[descope] session validation failed:', err instanceof Error ? err.message : String(err));

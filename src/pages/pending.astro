@@ -16,7 +16,7 @@ const user = result;
 
 // APPROVED users shouldn't land here
 if (user.approvalStatus === 'APPROVED') {
-  return Astro.redirect('/schedule');
+  return Astro.redirect('/member');
 }
 
 const isDisabled = Astro.url.searchParams.get('disabled') === '1'

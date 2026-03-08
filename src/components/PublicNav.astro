@@ -1,0 +1,61 @@
+---
+// PublicNav.astro – navigation strip for public (unauthenticated) pages
+
+export interface Props {
+  current?: 'home' | 'about' | 'gallery' | 'request' | 'login';
+}
+
+const { current } = Astro.props;
+---
+<nav class="public-nav">
+  <div class="public-nav-links">
+    <a href="/" class:list={['public-nav-link', { active: current === 'home' }]}>
+      Home
+    </a>
+    <a href="/about" class:list={['public-nav-link', { active: current === 'about' }]}>
+      About
+    </a>
+    <a href="/gallery" class:list={['public-nav-link', { active: current === 'gallery' }]}>
+      Gallery
+    </a>
+    <a href="/request" class:list={['public-nav-link', { active: current === 'request' }]}>
+      Join
+    </a>
+    <a href="/login" class:list={['public-nav-link', { active: current === 'login' }]}>
+      Log in
+    </a>
+  </div>
+</nav>
+
+<style>
+  .public-nav {
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+
+  .public-nav-links {
+    display: flex;
+    gap: 0.25rem;
+  }
+
+  .public-nav-link {
+    font-family: var(--font-ui);
+    font-size: 0.9rem;
+    text-decoration: none;
+    color: var(--color-muted);
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--radius);
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+
+  .public-nav-link:hover {
+    background: var(--color-border);
+    color: var(--color-text);
+  }
+
+  .public-nav-link.active {
+    background: var(--color-accent);
+    color: #fff;
+  }
+</style>

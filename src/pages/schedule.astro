@@ -16,12 +16,12 @@ const result = await requireApproved(Astro);
 if (result instanceof Response) return result;
 const user = result;
 
-const embedUrl2hr = import.meta.env.GOOGLE_SCHEDULING_EMBED_URL ?? '';
+const embedUrl2hr = import.meta.env.GOOGLE_SCHEDULING_EMBED_URL_2HR ?? import.meta.env.GOOGLE_SCHEDULING_EMBED_URL ?? '';
 const embedUrl4hr = import.meta.env.GOOGLE_SCHEDULING_EMBED_URL_4HR ?? '';
 ---
 <Layout title="Schedule Your Adventure" welcomeName={user.name ?? user.email ?? ''}>
   <Fragment slot="header-action">
-    <AuthNav />
+    <AuthNav current="schedule" />
   </Fragment>
 
   <h1>Welcome{user.name ? `, ${user.name}` : user.email ? `, ${user.email}` : ''}</h1>
@@ -77,7 +77,7 @@ const embedUrl4hr = import.meta.env.GOOGLE_SCHEDULING_EMBED_URL_4HR ?? '';
         <div class="card">
           <p>
             The 2-hour scheduling widget is not configured yet. Please set the
-            <code>GOOGLE_SCHEDULING_EMBED_URL</code> environment variable.
+            <code>GOOGLE_SCHEDULING_EMBED_URL_2HR</code> environment variable.
           </p>
         </div>
       )}
@@ -121,16 +121,29 @@ const embedUrl4hr = import.meta.env.GOOGLE_SCHEDULING_EMBED_URL_4HR ?? '';
   const tabs = document.querySelectorAll<HTMLButtonElement>('[role="tab"]');
   const panels = document.querySelectorAll<HTMLElement>('[role="tabpanel"]');
 
+  function selectTab(tabId: string) {
+    const tab = document.getElementById(tabId);
+    if (!tab) return;
+    const target = tab.getAttribute('aria-controls');
+
+    tabs.forEach((t) => t.setAttribute('aria-selected', 'false'));
+    panels.forEach((p) => p.setAttribute('aria-hidden', 'true'));
+
+    tab.setAttribute('aria-selected', 'true');
+    const activePanel = document.getElementById(target!);
+    if (activePanel) activePanel.setAttribute('aria-hidden', 'false');
+  }
+
   tabs.forEach((tab) => {
-    tab.addEventListener('click', () => {
-      const target = tab.getAttribute('aria-controls');
-
-      tabs.forEach((t) => t.setAttribute('aria-selected', 'false'));
-      panels.forEach((p) => p.setAttribute('aria-hidden', 'true'));
-
-      tab.setAttribute('aria-selected', 'true');
-      const activePanel = document.getElementById(target!);
-      if (activePanel) activePanel.setAttribute('aria-hidden', 'false');
-    });
+    tab.addEventListener('click', () => selectTab(tab.id));
   });
+
+  // Auto-select tab from query param (?tab=2hr or ?tab=4hr)
+  const params = new URLSearchParams(window.location.search);
+  const tabParam = params.get('tab');
+  if (tabParam === '4hr') {
+    selectTab('tab-4hr');
+  } else if (tabParam === '2hr') {
+    selectTab('tab-2hr');
+  }
 </script>

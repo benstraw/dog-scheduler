@@ -1,0 +1,299 @@
+---
+/**
+ * /onboarding — Owner + dog info form (APPROVED but not yet onboarded users)
+ *
+ * Guard: requireApprovedNotOnboarded() prevents redirect loops:
+ *   - Unauthenticated            → /
+ *   - PENDING                    → /pending
+ *   - DISABLED                   → /pending?disabled=1
+ *   - APPROVED + already onboarded → /member
+ *   - APPROVED + not onboarded    → renders this page
+ */
+import Layout from '../components/Layout.astro';
+import LogoutButton from '../components/LogoutButton.astro';
+import { requireApprovedNotOnboarded } from '../lib/authGuard';
+
+const result = await requireApprovedNotOnboarded(Astro);
+if (result instanceof Response) return result;
+const user = result;
+
+const formspreeId = import.meta.env.FORMSPREE_ONBOARDING_ID;
+const formAction = formspreeId ? `https://formspree.io/f/${formspreeId}` : '';
+---
+<Layout title="Complete Your Setup">
+  <Fragment slot="header-action">
+    <LogoutButton />
+  </Fragment>
+
+  <h1>Complete Your Setup</h1>
+
+  <p>
+    Welcome! Before you can start booking adventures, we need a few details about
+    you and your dog. This helps us plan safe, personalized outings.
+  </p>
+
+  {formAction ? (
+  <form
+    class="card onboarding-form"
+    id="onboarding-form"
+    method="POST"
+    action={formAction}
+  >
+    <input type="hidden" name="_user_email" value={user.email ?? ''} />
+    <input type="hidden" name="_user_name" value={user.name ?? ''} />
+
+    <h2 class="form-section-title">Owner Info</h2>
+
+    <div class="form-group">
+      <label for="ob-address">Address</label>
+      <textarea
+        id="ob-address"
+        name="address"
+        rows="2"
+        required
+        placeholder="Street address for pickup"
+      ></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="ob-pickup">Pickup Instructions</label>
+      <textarea
+        id="ob-pickup"
+        name="pickup_instructions"
+        rows="2"
+        required
+        placeholder="Gate code, where to find the dog, etc."
+      ></textarea>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="ob-emergency-name">Emergency Contact Name</label>
+        <input id="ob-emergency-name" type="text" name="emergency_contact_name" required />
+      </div>
+      <div class="form-group">
+        <label for="ob-emergency-phone">Emergency Contact Phone</label>
+        <input id="ob-emergency-phone" type="tel" name="emergency_contact_phone" required autocomplete="tel" />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="ob-vet-name">Veterinarian Name</label>
+        <input id="ob-vet-name" type="text" name="vet_name" required />
+      </div>
+      <div class="form-group">
+        <label for="ob-vet-phone">Veterinarian Phone</label>
+        <input id="ob-vet-phone" type="tel" name="vet_phone" required autocomplete="tel" />
+      </div>
+    </div>
+
+    <h2 class="form-section-title">Dog Info</h2>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="ob-dog-name">Dog's Name</label>
+        <input id="ob-dog-name" type="text" name="dog_name" required />
+      </div>
+      <div class="form-group">
+        <label for="ob-breed">Breed</label>
+        <input id="ob-breed" type="text" name="dog_breed" required />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="ob-age">Age</label>
+        <input id="ob-age" type="text" name="dog_age" required placeholder="e.g. 3 years" />
+      </div>
+      <div class="form-group">
+        <label for="ob-size">Size</label>
+        <select id="ob-size" name="dog_size" required>
+          <option value="">Select size</option>
+          <option value="small">Small (under 25 lbs)</option>
+          <option value="medium">Medium (25-55 lbs)</option>
+          <option value="large">Large (55-90 lbs)</option>
+          <option value="xlarge">Extra Large (90+ lbs)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="ob-temperament">Temperament</label>
+      <textarea
+        id="ob-temperament"
+        name="dog_temperament"
+        rows="2"
+        required
+        placeholder="How does your dog behave around other dogs, people, wildlife?"
+      ></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="ob-leash">Leash Behavior</label>
+      <textarea
+        id="ob-leash"
+        name="dog_leash_behavior"
+        rows="2"
+        required
+        placeholder="How does your dog do on leash? Any pulling, reactivity, off-leash recall?"
+      ></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="ob-medical">Medical Notes <span class="optional">(optional)</span></label>
+      <textarea
+        id="ob-medical"
+        name="dog_medical_notes"
+        rows="2"
+        placeholder="Allergies, medications, injuries, or anything we should know"
+      ></textarea>
+    </div>
+
+    <p id="form-error" class="form-error" style="display:none;"></p>
+
+    <button type="submit" class="btn btn-primary" id="submit-btn">Complete Setup</button>
+  </form>
+  ) : (
+    <div class="card">
+      <p>
+        The onboarding form is not configured yet. Please set the
+        <code>FORMSPREE_ONBOARDING_ID</code> environment variable.
+      </p>
+    </div>
+  )}
+</Layout>
+
+<style>
+  .onboarding-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .form-section-title {
+    font-size: 1.1rem;
+    color: var(--color-accent);
+    font-weight: 600;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  @media (max-width: 480px) {
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .form-group label {
+    font-family: var(--font-ui);
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-text);
+  }
+
+  .optional {
+    font-weight: normal;
+    color: var(--color-muted);
+  }
+
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    font-family: var(--font-ui);
+    font-size: 1rem;
+    color: var(--color-text);
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 0.6rem 0.85rem;
+    width: 100%;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .form-group input:focus,
+  .form-group textarea:focus,
+  .form-group select:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px rgba(74, 124, 89, 0.18);
+  }
+
+  .form-group textarea {
+    resize: vertical;
+  }
+
+  .form-error {
+    font-family: var(--font-ui);
+    font-size: 0.9rem;
+    color: var(--color-warn);
+    background: #fff3cd;
+    border-radius: var(--radius);
+    padding: 0.75rem 1rem;
+  }
+
+  .btn {
+    align-self: flex-start;
+  }
+</style>
+
+<script>
+  const form = document.getElementById('onboarding-form') as HTMLFormElement | null;
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
+      const errorEl = document.getElementById('form-error') as HTMLElement;
+      errorEl.style.display = 'none';
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitting...';
+
+      try {
+        // 1. Submit to Formspree
+        const formData = new FormData(form);
+        const formRes = await fetch(form.action, {
+          method: 'POST',
+          body: formData,
+          headers: { 'Accept': 'application/json' },
+        });
+
+        if (!formRes.ok) {
+          throw new Error('Form submission failed. Please try again.');
+        }
+
+        // 2. Mark onboarding complete in Descope
+        const flagRes = await fetch('/api/onboarding-complete', {
+          method: 'POST',
+          credentials: 'same-origin',
+        });
+
+        if (!flagRes.ok) {
+          throw new Error('Failed to finalize setup. Please contact us.');
+        }
+
+        // 3. Redirect to member home
+        window.location.href = '/member';
+      } catch (err) {
+        errorEl.textContent = err instanceof Error ? err.message : 'Something went wrong. Please try again.';
+        errorEl.style.display = 'block';
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Complete Setup';
+      }
+    });
+  }
+</script>

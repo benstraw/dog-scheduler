@@ -8,7 +8,7 @@ vi.mock('../descope', () => ({
 }));
 
 import { getSessionToken, validateSession } from '../descope';
-import { requireAuth, requireApproved } from '../authGuard';
+import { requireAuth, requireApproved, requireApprovedNotOnboarded } from '../authGuard';
 
 const mockGetSessionToken = vi.mocked(getSessionToken);
 const mockValidateSession = vi.mocked(validateSession);
@@ -25,18 +25,28 @@ const approvedUser: DescopeUserInfo = {
   userId: 'user-1',
   email: 'test@example.com',
   approvalStatus: 'APPROVED',
+  onboardingComplete: true,
+};
+
+const approvedNotOnboardedUser: DescopeUserInfo = {
+  userId: 'user-4',
+  email: 'new@example.com',
+  approvalStatus: 'APPROVED',
+  onboardingComplete: false,
 };
 
 const pendingUser: DescopeUserInfo = {
   userId: 'user-2',
   email: 'pending@example.com',
   approvalStatus: 'PENDING',
+  onboardingComplete: false,
 };
 
 const disabledUser: DescopeUserInfo = {
   userId: 'user-3',
   email: 'disabled@example.com',
   approvalStatus: 'DISABLED',
+  onboardingComplete: false,
 };
 
 beforeEach(() => {
@@ -132,5 +142,82 @@ describe('requireApproved', () => {
     expect((result as Response).headers.get('location')).toBe(
       'http://localhost/pending?disabled=1'
     );
+  });
+
+  it('redirects to /onboarding when APPROVED but not onboarded', async () => {
+    mockGetSessionToken.mockReturnValue('valid-token');
+    mockValidateSession.mockResolvedValue(approvedNotOnboardedUser);
+
+    const result = await requireApproved(makeMockAstro());
+
+    expect(result).toBeInstanceOf(Response);
+    expect((result as Response).headers.get('location')).toBe('http://localhost/onboarding');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// requireApprovedNotOnboarded
+// ---------------------------------------------------------------------------
+
+describe('requireApprovedNotOnboarded', () => {
+  it('redirects to / when no session token is present', async () => {
+    mockGetSessionToken.mockReturnValue(null);
+
+    const result = await requireApprovedNotOnboarded(makeMockAstro());
+
+    expect(result).toBeInstanceOf(Response);
+    expect((result as Response).headers.get('location')).toBe('http://localhost/');
+  });
+
+  it('redirects to / when the session token is invalid', async () => {
+    mockGetSessionToken.mockReturnValue('bad-token');
+    mockValidateSession.mockResolvedValue(null);
+
+    const result = await requireApprovedNotOnboarded(makeMockAstro());
+
+    expect(result).toBeInstanceOf(Response);
+    expect((result as Response).headers.get('location')).toBe('http://localhost/');
+  });
+
+  it('redirects to /pending when the user is PENDING', async () => {
+    mockGetSessionToken.mockReturnValue('valid-token');
+    mockValidateSession.mockResolvedValue(pendingUser);
+
+    const result = await requireApprovedNotOnboarded(makeMockAstro());
+
+    expect(result).toBeInstanceOf(Response);
+    expect((result as Response).headers.get('location')).toBe('http://localhost/pending');
+  });
+
+  it('redirects to /pending?disabled=1 when the user is DISABLED', async () => {
+    mockGetSessionToken.mockReturnValue('valid-token');
+    mockValidateSession.mockResolvedValue(disabledUser);
+
+    const result = await requireApprovedNotOnboarded(makeMockAstro());
+
+    expect(result).toBeInstanceOf(Response);
+    expect((result as Response).headers.get('location')).toBe(
+      'http://localhost/pending?disabled=1'
+    );
+  });
+
+  it('redirects to /member when APPROVED and already onboarded', async () => {
+    mockGetSessionToken.mockReturnValue('valid-token');
+    mockValidateSession.mockResolvedValue(approvedUser);
+
+    const result = await requireApprovedNotOnboarded(makeMockAstro());
+
+    expect(result).toBeInstanceOf(Response);
+    expect((result as Response).headers.get('location')).toBe('http://localhost/member');
+  });
+
+  it('returns user info when APPROVED and not yet onboarded', async () => {
+    mockGetSessionToken.mockReturnValue('valid-token');
+    mockValidateSession.mockResolvedValue(approvedNotOnboardedUser);
+
+    const result = await requireApprovedNotOnboarded(makeMockAstro());
+
+    expect(result).not.toBeInstanceOf(Response);
+    expect(result).toEqual(approvedNotOnboardedUser);
   });
 });

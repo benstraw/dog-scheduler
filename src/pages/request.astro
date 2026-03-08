@@ -1,0 +1,36 @@
+---
+/**
+ * /request — Request membership page
+ *
+ * Same Descope sign-up-or-in flow as /login, with membership-focused framing.
+ */
+import Layout from '../components/Layout.astro';
+import PublicNav from '../components/PublicNav.astro';
+import DescopeAuth from '../components/DescopeAuth.astro';
+
+const appUrl = import.meta.env.PUBLIC_APP_URL ?? Astro.url.origin;
+const requestRedirectUrl = new URL('/request', appUrl).href;
+---
+<Layout title="Request Membership">
+  <Fragment slot="header-action">
+    <PublicNav current="request" />
+  </Fragment>
+
+  <h1>Request Membership</h1>
+
+  <p>
+    Membership gives you access to personalized dog hiking adventures across
+    West LA, Venice, Playa Vista, Marina del Rey, and El Segundo. We review
+    every application to ensure the best fit for your dog.
+  </p>
+
+  <DescopeAuth
+    heading="Request Membership"
+    redirectUrl={requestRedirectUrl}
+    contextText="Create an account or sign in to request membership."
+  />
+
+  <p style="font-size:0.85rem; text-align:center; color: var(--color-muted)">
+    Already a member? <a href="/login">Log in here</a>.
+  </p>
+</Layout>

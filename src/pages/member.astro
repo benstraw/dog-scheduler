@@ -1,0 +1,108 @@
+---
+/**
+ * /member — Member home / booking hub (APPROVED + onboarded users only)
+ *
+ * Route guard: requireApproved() handles all redirect logic including
+ * the onboarding gate.
+ */
+import Layout from '../components/Layout.astro';
+import AuthNav from '../components/AuthNav.astro';
+import { requireApproved } from '../lib/authGuard';
+
+const result = await requireApproved(Astro);
+if (result instanceof Response) return result;
+const user = result;
+
+const displayName = user.name || user.email || '';
+---
+<Layout title="Member Home" welcomeName={displayName}>
+  <Fragment slot="header-action">
+    <AuthNav current="member" />
+  </Fragment>
+
+  <h1>Book Your Next Adventure</h1>
+
+  <div class="booking-cards">
+    <a href="/schedule?tab=2hr" class="booking-card">
+      <span class="booking-icon">🥾</span>
+      <span class="booking-label">2-Hour Hike</span>
+      <span class="booking-desc">A great midday outing</span>
+    </a>
+
+    <a href="/schedule?tab=4hr" class="booking-card">
+      <span class="booking-icon">🏔️</span>
+      <span class="booking-label">4-Hour Hike</span>
+      <span class="booking-desc">The full adventure experience</span>
+    </a>
+
+    <a href="/adventure-request" class="booking-card">
+      <span class="booking-icon">🌟</span>
+      <span class="booking-label">Custom Adventure</span>
+      <span class="booking-desc">Something truly special</span>
+    </a>
+  </div>
+
+  <div class="card quick-links">
+    <a href="/payments">View Payment Options</a>
+    <span class="separator">·</span>
+    <a href="mailto:ben@benstrawbridge.com">Contact Us</a>
+  </div>
+</Layout>
+
+<style>
+  .booking-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 1rem;
+  }
+
+  .booking-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1.5rem 1rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    text-decoration: none;
+    transition: box-shadow 0.15s ease, transform 0.15s ease;
+  }
+
+  .booking-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+  }
+
+  .booking-icon {
+    font-size: 2rem;
+    line-height: 1;
+  }
+
+  .booking-label {
+    font-family: var(--font-ui);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text);
+  }
+
+  .booking-desc {
+    font-family: var(--font-ui);
+    font-size: 0.8rem;
+    color: var(--color-muted);
+    text-align: center;
+  }
+
+  .quick-links {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.75rem;
+    font-family: var(--font-ui);
+    font-size: 0.9rem;
+  }
+
+  .separator {
+    color: var(--color-border);
+  }
+</style>

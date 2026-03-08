@@ -1,0 +1,59 @@
+---
+/**
+ * /about — Public about page
+ */
+import Layout from '../components/Layout.astro';
+import PublicNav from '../components/PublicNav.astro';
+---
+<Layout title="About">
+  <Fragment slot="header-action">
+    <PublicNav current="about" />
+  </Fragment>
+
+  <h1>About Bespoke Dog Adventures</h1>
+
+  <section class="content-section">
+    <h2>Our Story</h2>
+    <p>
+      Bespoke Dog Adventures started with a simple idea: dogs deserve more than
+      a quick walk around the block. They deserve real outdoor experiences that
+      match their energy and curiosity. What began as adventures with a few
+      neighborhood dogs has grown into a trusted, membership-based service across
+      West LA.
+    </p>
+  </section>
+
+  <section class="content-section">
+    <h2>Safety First</h2>
+    <p>
+      Every adventure is carefully planned with safety as the top priority. We
+      keep groups small so each dog gets individual attention. We carry water,
+      first aid supplies, and always have a plan. We get to know every dog's
+      temperament, triggers, and needs before the first hike.
+    </p>
+  </section>
+
+  <section class="content-section">
+    <h2>How Adventures Work</h2>
+    <p>
+      We offer 2-hour and 4-hour adventures through trails, beaches, and open
+      spaces across West LA, Venice, Playa Vista, Marina del Rey, and El Segundo.
+      Each outing is tailored to the group — we match dogs by energy level and
+      temperament so everyone has a great time.
+    </p>
+  </section>
+
+  <section class="content-section">
+    <h2>Pickup & Drop-off</h2>
+    <p>
+      We pick up and drop off your dog right at your door. You provide any gate
+      codes or special instructions during onboarding, and we handle the rest.
+      You'll receive photos and updates during every adventure so you always know
+      your dog is having a blast.
+    </p>
+  </section>
+
+  <div style="text-align:center; padding: 1rem 0;">
+    <a href="/request" class="btn btn-primary">Request Membership</a>
+  </div>
+</Layout>

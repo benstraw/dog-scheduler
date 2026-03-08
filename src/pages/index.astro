@@ -2,42 +2,79 @@
 /**
  * / — Landing page (public)
  *
- * Shows the service description and a "Log in" button.
- * Already-authenticated APPROVED users are forwarded to /schedule.
+ * Marketing homepage with hero, trust photos, testimonials, and about preview.
+ * Already-authenticated APPROVED users are forwarded to /member.
  */
 import Layout from '../components/Layout.astro';
-import LoginButton from '../components/LoginButton.astro';
+import PublicNav from '../components/PublicNav.astro';
 import { getSessionToken, validateSession } from '../lib/descope';
 
-// If the visitor is already logged in and approved, skip straight to scheduling
+// If the visitor is already logged in and approved, skip straight to member home
 const token = getSessionToken(Astro.request);
 if (token) {
   const user = await validateSession(token);
   if (user?.approvalStatus === 'APPROVED') {
-    return Astro.redirect('/schedule');
+    return Astro.redirect('/member');
   }
 }
 ---
 <Layout title="Welcome">
-  <h1>Bespoke Dog Adventures</h1>
+  <Fragment slot="header-action">
+    <PublicNav current="home" />
+  </Fragment>
 
-  <p>
-    Personalised, small-group dog hikes and walks through the best trails in
-    the area. Each adventure is tailored to your dog's pace, energy, and
-    personality — because no two dogs are the same.
-  </p>
+  <section class="hero">
+    <h1>The adventure your dog deserves.</h1>
+    <p>
+      Personalized, small-group dog hikes across West LA, Venice, Playa Vista,
+      Marina del Rey, and El Segundo.
+    </p>
+    <a href="/request" class="btn btn-primary">Request Membership</a>
+  </section>
 
-  <p>
-    To book an adventure, log in below. New clients
-    are approved manually so we can make sure every outing is a great fit.
-  </p>
+  <section class="content-section">
+    <h2>Adventures in Action</h2>
+    <div class="photo-grid">
+      <img src="/images/placeholder-1.svg" alt="Dogs hiking on a sunny trail" />
+      <img src="/images/placeholder-2.svg" alt="Happy dog on the beach" />
+      <img src="/images/placeholder-3.svg" alt="Small group of dogs on a forest path" />
+      <img src="/images/placeholder-4.svg" alt="Dog exploring a canyon trail" />
+    </div>
+    <p style="text-align:center">
+      <a href="/gallery">View Full Gallery →</a>
+    </p>
+  </section>
 
-  <div>
-    <LoginButton />
+  <section class="content-section">
+    <h2>What Our Members Say</h2>
+    <blockquote class="testimonial">
+      "My dog comes home tired and happy every single time. I've never seen her so excited to go somewhere."
+      <cite>— Sarah M., Venice</cite>
+    </blockquote>
+    <blockquote class="testimonial">
+      "Ben really gets to know each dog. It's not just a walk, it's a real adventure tailored to their personality."
+      <cite>— Jake R., Playa Vista</cite>
+    </blockquote>
+    <blockquote class="testimonial">
+      "The photos and updates I get after each hike make my day. I know my pup is in the best hands."
+      <cite>— Maria L., Marina del Rey</cite>
+    </blockquote>
+  </section>
+
+  <section class="content-section">
+    <h2>About Us</h2>
+    <p>
+      Every dog deserves more than a walk around the block. We believe in
+      real outdoor experiences — trails, hills, beaches, and open space — where
+      dogs can be dogs. Each adventure is carefully planned around your dog's
+      energy, temperament, and needs.
+    </p>
+    <p>
+      <a href="/about">Learn more about us →</a>
+    </p>
+  </section>
+
+  <div style="text-align:center; padding: 1rem 0;">
+    <a href="/request" class="btn btn-primary">Request Membership</a>
   </div>
-
-  <p style="font-size:0.9rem">
-    Questions? Email us at
-    <a href="mailto:hello@dogadventures.example">hello@dogadventures.example</a>.
-  </p>
 </Layout>

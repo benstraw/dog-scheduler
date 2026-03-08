@@ -1,6 +1,6 @@
 ---
 /**
- * /side-quest — Custom adventure request form (APPROVED users only)
+ * /adventure-request — Custom adventure request form (APPROVED users only)
  *
  * Route guard: requireApproved() handles all redirect logic:
  *   - Unauthenticated  → /
@@ -16,15 +16,15 @@ const result = await requireApproved(Astro);
 if (result instanceof Response) return result;
 const user = result;
 
-const formspreeId = import.meta.env.FORMSPREE_SIDE_QUEST_ID;
+const formspreeId = import.meta.env.FORMSPREE_ADVENTURE_REQUEST_ID;
 const formAction = formspreeId ? `https://formspree.io/f/${formspreeId}` : '';
 ---
-<Layout title="Request Side Quest">
+<Layout title="Custom Adventure Request">
   <Fragment slot="header-action">
-    <AuthNav current="side-quest" />
+    <AuthNav current="adventure-request" />
   </Fragment>
 
-  <h1>Request Side Quest</h1>
+  <h1>Custom Adventure Request</h1>
 
   <p>
     If you would like to go on a truly custom adventure with us just let us know
@@ -35,14 +35,14 @@ const formAction = formspreeId ? `https://formspree.io/f/${formspreeId}` : '';
 
   {formAction ? (
   <form
-    class="card side-quest-form"
+    class="card adventure-request-form"
     method="POST"
     action={formAction}
   >
     <div class="form-group">
-      <label for="sq-email">Your Email</label>
+      <label for="ar-email">Your Email</label>
       <input
-        id="sq-email"
+        id="ar-email"
         type="email"
         name="email"
         required
@@ -52,9 +52,9 @@ const formAction = formspreeId ? `https://formspree.io/f/${formspreeId}` : '';
     </div>
 
     <div class="form-group">
-      <label for="sq-phone">Phone Number</label>
+      <label for="ar-phone">Phone Number</label>
       <input
-        id="sq-phone"
+        id="ar-phone"
         type="tel"
         name="phone"
         value={user.phone ?? ''}
@@ -64,9 +64,9 @@ const formAction = formspreeId ? `https://formspree.io/f/${formspreeId}` : '';
     </div>
 
     <div class="form-group">
-      <label for="sq-date">Requested Date &amp; Start Time</label>
+      <label for="ar-date">Requested Date &amp; Start Time</label>
       <input
-        id="sq-date"
+        id="ar-date"
         type="datetime-local"
         name="requested_date"
         required
@@ -74,9 +74,9 @@ const formAction = formspreeId ? `https://formspree.io/f/${formspreeId}` : '';
     </div>
 
     <div class="form-group">
-      <label for="sq-message">Special Requests</label>
+      <label for="ar-message">Special Requests</label>
       <textarea
-        id="sq-message"
+        id="ar-message"
         name="message"
         rows="6"
         required
@@ -90,18 +90,14 @@ const formAction = formspreeId ? `https://formspree.io/f/${formspreeId}` : '';
     <div class="card">
       <p>
         The request form is not configured yet. Please set the
-        <code>FORMSPREE_SIDE_QUEST_ID</code> environment variable.
+        <code>FORMSPREE_ADVENTURE_REQUEST_ID</code> environment variable.
       </p>
     </div>
   )}
-
-  <p class="user-info">
-    Logged in{user.name ? ` as ${user.name}` : ''}.
-  </p>
 </Layout>
 
 <style>
-  .side-quest-form {
+  .adventure-request-form {
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
@@ -147,10 +143,5 @@ const formAction = formspreeId ? `https://formspree.io/f/${formspreeId}` : '';
 
   .btn {
     align-self: flex-start;
-  }
-
-  .user-info {
-    font-size: 0.85rem;
-    color: var(--color-muted);
   }
 </style>

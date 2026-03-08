@@ -1,0 +1,35 @@
+---
+/**
+ * /gallery — Public photo gallery
+ */
+import Layout from '../components/Layout.astro';
+import PublicNav from '../components/PublicNav.astro';
+---
+<Layout title="Gallery">
+  <Fragment slot="header-action">
+    <PublicNav current="gallery" />
+  </Fragment>
+
+  <h1>Gallery</h1>
+
+  <p>
+    A glimpse into what our adventures look like. Every outing is different —
+    these are just a few of the places and moments our dogs have enjoyed.
+  </p>
+
+  <div class="photo-grid">
+    <img src="/images/gallery/gallery-1.svg" alt="Dogs on a mountain trail" />
+    <img src="/images/gallery/gallery-2.svg" alt="Dog playing at the beach" />
+    <img src="/images/gallery/gallery-3.svg" alt="Dogs resting under a tree" />
+    <img src="/images/gallery/gallery-4.svg" alt="Dog crossing a stream" />
+    <img src="/images/gallery/gallery-5.svg" alt="Group of dogs on a hilltop" />
+    <img src="/images/gallery/gallery-6.svg" alt="Dog exploring a canyon" />
+    <img src="/images/gallery/gallery-7.svg" alt="Sunset hike with dogs" />
+    <img src="/images/gallery/gallery-8.svg" alt="Dog on a forest path" />
+    <img src="/images/gallery/gallery-9.svg" alt="Dogs at a scenic overlook" />
+  </div>
+
+  <div style="text-align:center; padding: 1rem 0;">
+    <a href="/request" class="btn btn-primary">Request Membership</a>
+  </div>
+</Layout>
