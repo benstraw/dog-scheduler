@@ -286,8 +286,9 @@ const formAction = formspreeId ? `https://formspree.io/f/${formspreeId}` : '';
           throw new Error('Failed to finalize setup. Please contact us.');
         }
 
-        // 3. Redirect to member home
-        window.location.href = '/member';
+        // 3. Clear stale session so login gives a fresh JWT with onboardingComplete=true
+        document.cookie = 'DS=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        window.location.href = '/login';
       } catch (err) {
         errorEl.textContent = err instanceof Error ? err.message : 'Something went wrong. Please try again.';
         errorEl.style.display = 'block';
