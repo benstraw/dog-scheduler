@@ -11,23 +11,19 @@ import { getSessionToken, validateSession } from '../../lib/descope';
 export const POST: APIRoute = async ({ request }) => {
   const sessionToken = getSessionToken(request);
   if (!sessionToken) {
-    console.error('[onboarding-complete] No session token found. Cookie header:', request.headers.get('cookie')?.substring(0, 100) ?? '(none)');
-    return new Response('Unauthorized', { status: 401 });
+    // 461 = no DS cookie found
+    return new Response('No session token', { status: 461 });
   }
 
   const user = await validateSession(sessionToken);
   if (!user) {
-    console.error('[onboarding-complete] Session validation failed (token present but invalid)');
-    return new Response('Unauthorized', { status: 401 });
+    // 462 = token present but validation failed
+    return new Response('Session invalid', { status: 462 });
   }
 
   if (user.approvalStatus !== 'APPROVED') {
-    console.error('[onboarding-complete] User not APPROVED:', {
-      userId: user.userId,
-      approvalStatus: user.approvalStatus,
-      email: user.email,
-    });
-    return new Response('Forbidden', { status: 403 });
+    // 463 = user not APPROVED (status: <actual>)
+    return new Response(`Not approved: ${user.approvalStatus}`, { status: 463 });
   }
 
   const projectId = import.meta.env.DESCOPE_PROJECT_ID;
